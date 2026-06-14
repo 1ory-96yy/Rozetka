@@ -19,6 +19,12 @@
         <div class="header-actions">
             @if (SignInManager.IsSignedIn(User))
             {
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="Index" class="header-icon-btn" title="Адмін панель">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </a>
+                }
                 <a asp-controller="Shop" asp-action="Index" class="header-icon-btn" title="Мій магазин">
                     <i class="fa-solid fa-shop"></i>
                 </a>

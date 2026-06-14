@@ -301,7 +301,7 @@ namespace Rozetka.Controllers
             ViewBag.Categories = new SelectList(cats, "Id", "Name", selectedId);
         }
 
-        private async Task<IActionResult> ShopDetails(int id)
+        public async Task<IActionResult> ShopDetails(int id)
         {
             var shopDetails = await _shopService.GetShopDetailsByIdAsync(id);
 

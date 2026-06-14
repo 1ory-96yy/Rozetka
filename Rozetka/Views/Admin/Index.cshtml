@@ -62,7 +62,11 @@
                 <div><p class="stat-value">@Model.UsersCount</p><span class="stat-label">Користувачі</span></div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-shop"></i></div>
+                <div class="stat-icon" style="background:#e0f2fe;color:#0284c7"><i class="fa-solid fa-shop"></i></div>
+                <div><p class="stat-value">@Model.ShopsCount</p><span class="stat-label">Магазини</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-clock"></i></div>
                 <div>
                     <p class="stat-value">@Model.PendingCount</p>
                     <span class="stat-label">Заявки Pending</span>
@@ -89,30 +93,33 @@
                                 <tr>
                                     <td class="td-id">#@item.Id</td>
                                     <td><img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/phone.jpg" : item.ImageUrl)" class="product-img" onerror="this.src='/images/phone.jpg'" /></td>
-                                    <td><span class="td-name">@item.Name</span>@if(!string.IsNullOrEmpty(item.Description)){
-                                    <span class="td-desc">@(item.Description.Length > 60 ? item.Description[..60] + "…" : item.Description)</span>
-                                }
-        </td>
-                                <td>@if(!string.IsNullOrEmpty(item.CategoryName)){
-                                <span class="td-badge">@item.CategoryName</span>
-                            }
-    </td>
-                            <td class="td-price">@item.Price.ToString("N0") ₴</td>
-                            <td>
-                                <div class="actions">
-                                    <a asp-action="ProductDetails" asp-route-id="@item.Id" class="info-btn" title="Деталі"><i class="fa-solid fa-circle-info"></i></a>
-                                    <a asp-action="EditProduct" asp-route-id="@item.Id" class="edit-btn" title="Редагувати"><i class="fa-solid fa-pen"></i></a>
-                                    <form asp-action="DeleteProduct" method="post" style="display:inline" onsubmit="return confirm('Видалити «@item.Name»?')">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                    <td>
+                                        <span class="td-name">@item.Name</span>@if(!string.IsNullOrEmpty(item.Description)){
+                                        <span class="td-desc">@(item.Description.Length > 60 ? item.Description[..60] + "…" : item.Description)</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.CategoryName))
+                                    {
+                                        <span class="td-badge">@item.CategoryName</span>
+                                    }
+                                </td>
+                                <td class="td-price">@item.Price.ToString("N0") ₴</td>
+                                <td>
+                                    <div class="actions">
+                                        <a asp-action="ProductDetails" asp-route-id="@item.Id" class="info-btn" title="Деталі"><i class="fa-solid fa-circle-info"></i></a>
+                                        <a asp-action="EditProduct" asp-route-id="@item.Id" class="edit-btn" title="Редагувати"><i class="fa-solid fa-pen"></i></a>
+                                        <form asp-action="DeleteProduct" method="post" style="display:inline" onsubmit="return confirm('Видалити «@item.Name»?')">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="delete-btn"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
                         }
+                    </tbody>
+                </table>
+            }
                         }
 
                         else if (ct == "categories")
@@ -204,33 +211,114 @@
             else if (ct == "shops")
             {
                 <div class="table-header">
-                    <h2 class="table-title">Заявки на магазин <span class="td-status td-status-pending" style="font-size:14px">Pending @Model.PendingCount</span></h2>
+                    <h2 class="table-title">Активні магазини</h2>
+                    <span class="product-count">@Model.Shops.Count магазинів</span>
                 </div>
-                @if (!Model.PendingShops.Any())
+
+                @if (!Model.Shops.Any())
                 {
                     <div class="admin-empty">
                         <i class="fa-solid fa-shop"></i>
+                        <p>Підтверджених магазинів ще немає</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Назва</th>
+                                <th>Власник</th>
+                                <th>Email</th>
+                                <th>Товарів</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var shop in Model.Shops)
+                            {
+                                <tr>
+                                    <td class="td-id">#@shop.Id</td>
+                                    <td>
+                                        <span class="td-name">@shop.Name</span>
+                                        @if (!string.IsNullOrEmpty(shop.Description))
+                                        {
+                                            <span class="td-desc">@(shop.Description.Length > 50 ? shop.Description[..50] + "…" : shop.Description)</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;flex-direction:column;gap:2px">
+                                            <span class="td-name" style="font-size:14px">@(string.IsNullOrWhiteSpace(shop.OwnerFullName) ? "—" : shop.OwnerFullName)</span>
+                                            <span class="td-email">@shop.OwnerEmail</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-email">@shop.OwnerEmail</td>
+                                    <td><span class="td-badge">@shop.ProductsCount</span></td>
+                                    <td>
+                                        <div class="actions">
+                                            <a asp-action="ShopDetails" asp-route-id="@shop.Id"
+                                               class="info-btn" title="Деталі">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <div class="table-header" style="margin-top:32px;border-top:1px solid #f3f4f6;padding-top:24px">
+                    <h2 class="table-title">
+                        Заявки на розгляді
+                        @if (Model.PendingCount > 0)
+                        {
+                            <span class="td-status td-status-pending" style="font-size:13px;margin-left:8px">@Model.PendingCount</span>
+                        }
+                    </h2>
+                </div>
+
+                @if (!Model.PendingShops.Any())
+                {
+                    <div class="admin-empty">
+                        <i class="fa-solid fa-clock"></i>
                         <p>Нових заявок немає</p>
                     </div>
                 }
                 else
                 {
                     <table class="admin-table">
-                        <thead><tr><th>ID</th><th>Назва магазину</th><th>Власник</th><th>Email</th><th>Опис</th><th>Дія</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Назва магазину</th>
+                                <th>Власник</th>
+                                <th>Опис</th>
+                                <th>Дія</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @foreach (var shop in Model.PendingShops)
                             {
                                 <tr>
                                     <td class="td-id">#@shop.Id</td>
                                     <td><span class="td-name">@shop.Name</span></td>
-                                    <td>@(shop.OwnerFullName ?? "—")</td>
-                                    <td class="td-email">@shop.OwnerEmail</td>
-                                    <td><span class="td-desc">@(string.IsNullOrEmpty(shop.Description) ? "—" : (shop.Description.Length > 60 ? shop.Description[..60] + "…" : shop.Description))</span></td>
+                                    <td>
+                                        <div style="display:flex;flex-direction:column;gap:2px">
+                                            <span style="font-weight:600;font-size:14px">@(string.IsNullOrWhiteSpace(shop.OwnerFullName) ? "—" : shop.OwnerFullName)</span>
+                                            <span class="td-email">@shop.OwnerEmail</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="td-desc">@(string.IsNullOrEmpty(shop.Description) ? "—" : (shop.Description.Length > 60 ? shop.Description[..60] + "…" : shop.Description))</span>
+                                    </td>
                                     <td>
                                         <form asp-action="ApproveShop" method="post" style="display:inline">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@shop.Id" />
-                                            <button type="submit" class="add-btn" style="padding:8px 14px;font-size:13px"
+                                            <button type="submit" class="add-btn"
+                                                    style="padding:8px 14px;font-size:13px"
                                                     onclick="return confirm('Підтвердити магазин «@shop.Name»?')">
                                                 <i class="fa-solid fa-check"></i> Підтвердити
                                             </button>
