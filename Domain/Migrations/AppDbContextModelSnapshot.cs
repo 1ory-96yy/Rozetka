@@ -84,6 +84,33 @@ namespace Domain.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Domain.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Favorites");
+                });
+
             modelBuilder.Entity("Domain.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -165,6 +192,9 @@ namespace Domain.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("ShopId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Specifications")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -173,7 +203,39 @@ namespace Domain.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("ShopId");
+
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Domain.Shop", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("Shops");
                 });
 
             modelBuilder.Entity("Domain.User", b =>
@@ -185,6 +247,15 @@ namespace Domain.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardCvv")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardExpiry")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -413,6 +484,25 @@ namespace Domain.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Favorite", b =>
+                {
+                    b.HasOne("Domain.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Order", b =>
                 {
                     b.HasOne("Domain.User", "User")
@@ -451,7 +541,25 @@ namespace Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Shop", "Shop")
+                        .WithMany("Products")
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Category");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("Domain.Shop", b =>
+                {
+                    b.HasOne("Domain.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -518,6 +626,11 @@ namespace Domain.Migrations
             modelBuilder.Entity("Domain.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Domain.Shop", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Domain.User", b =>
